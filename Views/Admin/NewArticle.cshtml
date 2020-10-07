@@ -1,0 +1,51 @@
+﻿@model OctoCodes.Models.Article
+@{
+    ViewData["Title"] = "NewArticle";
+}
+
+<h1>NewArticle</h1>
+
+
+<div class="row">
+    <div>
+        <form asp-action="NewArticle" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title">Nadpis článku</label>
+                <input asp-for="Title" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Author">Autor článku</label>
+                <input asp-for="Author" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="ImageFile">Úvodní obrázek</label>
+                <input asp-for="ImageFile" accept="image/*" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Category">Kategorie</label>
+                <input asp-for="Category" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Text">Text</label>
+                <textarea asp-for="Text" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Přidat článek" class="btn btn-primary" /> <br />
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script src="~/lib/ckeditor5/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#Text'))
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
+}

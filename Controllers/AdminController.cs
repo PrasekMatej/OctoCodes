@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Connections.Features;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OctoCodes.Data;
@@ -15,69 +17,120 @@ namespace OctoCodes.Controllers
     public class AdminController : Controller
     {
         private readonly OctoCodesContext ctx;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public AdminController(OctoCodesContext ctx)
+        public AdminController(OctoCodesContext ctx, IWebHostEnvironment webHostEnvironment)
         {
             this.ctx = ctx;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Login()
+        public IActionResult NewArticle()
         {
             return View();
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login([Bind("Username, Password")] User user)
+        public IActionResult NewArticle([Bind("Author, Title, Text, ImageFile, Category")] Article article)
         {
-            try
+            if (!ModelState.IsValid)
+                return View(article);
+
+            article.Image = SaveImage(article.ImageFile);
+            article.CreatedDate = DateTime.Now;
+            article.Views = 0;
+
+            ctx.Articles.Add(article);
+            ctx.SaveChanges();
+
+            return new JsonResult("Article successfully created!");
+            //return RedirectToAction(nameof(Index));
+        }
+
+        private string SaveImage(IFormFile image)
+        {
+            var imageName = GetImageName(image);
+            var path = Path.Combine(webHostEnvironment.WebRootPath, "img");
+            if (!Directory.Exists(path))
             {
-                CheckPassword(user.Username, user.Password);
-                return new JsonResult("logged in!");
-                //return RedirectToAction(nameof(Index));
+                Directory.CreateDirectory(path);
             }
-            catch
+            using var fs = new FileStream(Path.Combine(path, imageName), FileMode.Create);
+            image.CopyTo(fs);
+            return imageName;
+        }
+
+        public IActionResult Login()
             {
-                TempData["LoginFailed"] = true;
                 return View();
             }
-        }
+        
 
-        public static string EncryptPassword(string password)
-        {
-            byte[] salt;
-            new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
+        [
 
-            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
-            byte[] hash = pbkdf2.GetBytes(20);
+            HttpPost]
+                [ValidateAntiForgeryToken]
 
-            byte[] hashBytes = new byte[36];
-            Array.Copy(salt, 0, hashBytes, 0, 16);
-            Array.Copy(hash, 0, hashBytes, 16, 20);
+            public IActionResult Login([Bind("Username, Password")] User user)
+            {
+                try
+                {
+                    CheckPassword(user.Username, user.Password);
+                    return new JsonResult("logged in!");
+                    //return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    TempData["LoginFailed"] = true;
+                    return View();
+                }
+            }
 
-            return Convert.ToBase64String(hashBytes);
-        }
+            public static string EncryptPassword(string password)
+            {
+                byte[] salt;
+                new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
 
-        private void CheckPassword(string username, string password)
-        {
-            var user = ctx.Users.Single(u => u.Username == username);
-            if(user == null)
-                throw new UnauthorizedAccessException();
+                var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
+                byte[] hash = pbkdf2.GetBytes(20);
 
-            /* Fetch the stored value */
-            string savedPasswordHash = user.Password;
-            /* Extract the bytes */
-            byte[] hashBytes = Convert.FromBase64String(savedPasswordHash);
-            /* Get the salt */
-            byte[] salt = new byte[16];
-            Array.Copy(hashBytes, 0, salt, 0, 16);
-            /* Compute the hash on the password the user entered */
-            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
-            byte[] hash = pbkdf2.GetBytes(20);
-            /* Compare the results */
-            for (int i = 0; i < 20; i++)
-                if (hashBytes[i + 16] != hash[i])
+                byte[] hashBytes = new byte[36];
+                Array.Copy(salt, 0, hashBytes, 0, 16);
+                Array.Copy(hash, 0, hashBytes, 16, 20);
+
+                return Convert.ToBase64String(hashBytes);
+            }
+
+            private void CheckPassword(string username, string password)
+            {
+                var user = ctx.Users.Single(u => u.Username == username);
+                if (user == null)
                     throw new UnauthorizedAccessException();
+
+                /* Fetch the stored value */
+                string savedPasswordHash = user.Password;
+                /* Extract the bytes */
+                byte[] hashBytes = Convert.FromBase64String(savedPasswordHash);
+                /* Get the salt */
+                byte[] salt = new byte[16];
+                Array.Copy(hashBytes, 0, salt, 0, 16);
+                /* Compute the hash on the password the user entered */
+                var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
+                byte[] hash = pbkdf2.GetBytes(20);
+                /* Compare the results */
+                for (int i = 0; i < 20; i++)
+                    if (hashBytes[i + 16] != hash[i])
+                        throw new UnauthorizedAccessException();
+            }
+
+            private string GetImageName(IFormFile image)
+            {
+                var filename = Path.GetFileNameWithoutExtension(image.FileName);
+                var extension = Path.GetExtension(image.FileName);
+                filename = filename + DateTime.Now.ToString("yymmssfff") + extension;
+                return filename;
+            }
         }
     }
-}

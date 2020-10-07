@@ -5,6 +5,10 @@
     {
       "library": "font-awesome@5.14.0",
       "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "ckeditor5@23.0.0",
+      "destination": "wwwroot/lib/ckeditor5/"
     }
   ]
 }

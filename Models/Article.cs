@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace OctoCodes.Models
 {
@@ -14,5 +16,7 @@ namespace OctoCodes.Models
         public string Image { get; set; }
         public int Views { get; set; }
         public string Category { get; set; }
+        [NotMapped] 
+        public IFormFile ImageFile { get; set; }
     }
 }
