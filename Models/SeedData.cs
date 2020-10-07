@@ -26,6 +26,7 @@ namespace OctoCodes.Models
                     Password = AdminController.EncryptPassword("Password1")
                 }
             );
+            ctx.SaveChanges();
         }
     }
 }
