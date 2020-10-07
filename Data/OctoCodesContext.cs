@@ -8,5 +8,7 @@ namespace OctoCodes.Data
         public OctoCodesContext(DbContextOptions<OctoCodesContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }
