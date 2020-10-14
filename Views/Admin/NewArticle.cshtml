@@ -50,6 +50,67 @@
                 {
                     simpleUpload: {
                         uploadUrl: '/Admin/UploadImage'
+                    },
+                    fontFamily: {
+                        supportAllValues: true
+                    },
+                    fontSize: {
+                        options: [8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 36, 48],
+                        supportAllValues: true
+                    },
+                    fontColor: {
+                        colors: [
+                            {
+                                color: 'hsl(0, 0%, 0%)',
+                                label: 'Black'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 30%)',
+                                label: 'Dim grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 60%)',
+                                label: 'Grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 90%)',
+                                label: 'Light grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 100%)',
+                                label: 'White',
+                                hasBorder: true
+                            },
+                            {
+                                color: 'hsl(0, 100%, 60%)',
+                                label: 'Red'
+                            },
+                            {
+                                color: 'hsl(30, 100%, 60%)',
+                                label: 'Orange'
+                            },
+                            {
+                                color: 'hsl(60, 100%, 60%)',
+                                label: 'Yellow'
+                            },
+                            {
+                                color: 'hsl(90, 100%, 60%)',
+                                label: 'Light green'
+                            },
+                            {
+                                color: 'hsl(120, 100%, 60%)',
+                                label: 'Green'
+                            },
+                            {
+                                color: 'hsl(240, 100%, 60%)',
+                                label: 'Blue'
+                            },
+                            {
+                                color: 'hsl(210, 100%, 60%)',
+                                label: 'Light blue'
+                            }
+                        ],
+                        columns: 6
                     }
                 })
             .catch(error => {
@@ -60,11 +121,11 @@
         function readURL(input) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-    
+
                 reader.onload = function(e) {
                     $('#thumbnail').attr('src', e.target.result);
                 }
-    
+
                 reader.readAsDataURL(input.files[0]); // convert to base64 string
             }
         }
