@@ -8,7 +8,10 @@
     },
     {
       "library": "ckeditor5@23.0.0",
-      "destination": "wwwroot/lib/ckeditor5/"
+      "destination": "wwwroot/lib/ckeditor5/",
+      "files": [
+        "ckeditor.js"
+      ]
     }
   ]
 }

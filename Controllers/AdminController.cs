@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +29,8 @@ namespace OctoCodes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult NewArticle([Bind("Author, Title, Text, ImageFile, Category")] Article article)
+        public IActionResult NewArticle([Bind("Author, Title, Text, ImageFile, Category")]
+            Article article)
         {
             if (!ModelState.IsValid)
                 return View(article);
@@ -49,48 +46,52 @@ namespace OctoCodes.Controllers
             //return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public ActionResult UploadImage(IFormFile upload)
+        {
+            if (upload.Length <= 0) return null;
+            var filename = SaveImage(upload);
+            var url = $"{Url.Content("~/")}img/{filename}";
+            var success = new {url};
+            return Json(success);
+        }
+
         private string SaveImage(IFormFile image)
         {
             var imageName = GetImageName(image);
             var path = Path.Combine(webHostEnvironment.WebRootPath, "img");
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using var fs = new FileStream(Path.Combine(path, imageName), FileMode.Create);
             image.CopyTo(fs);
             return imageName;
         }
 
         public IActionResult Login()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Login([Bind("Username, Password")] User user)
+        {
+            try
             {
+                CheckPassword(user.Username, user.Password);
+                return new JsonResult("logged in!");
+                //return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                TempData["LoginFailed"] = true;
                 return View();
             }
-        
+        }
 
-        [
-
-            HttpPost]
-                [ValidateAntiForgeryToken]
-
-            public IActionResult Login([Bind("Username, Password")] User user)
-            {
-                try
-                {
-                    CheckPassword(user.Username, user.Password);
-                    return new JsonResult("logged in!");
-                    //return RedirectToAction(nameof(Index));
-                }
-                catch
-                {
-                    TempData["LoginFailed"] = true;
-                    return View();
-                }
-            }
-
-            public static string EncryptPassword(string password)
-            {
-                byte[] salt;
+        public static string EncryptPassword(string password)
+        {
+            byte[] salt;
                 new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
 
                 var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
@@ -100,13 +101,13 @@ namespace OctoCodes.Controllers
                 Array.Copy(salt, 0, hashBytes, 0, 16);
                 Array.Copy(hash, 0, hashBytes, 16, 20);
 
-                return Convert.ToBase64String(hashBytes);
-            }
+            return Convert.ToBase64String(hashBytes);
+        }
 
-            private void CheckPassword(string username, string password)
-            {
-                var user = ctx.Users.Single(u => u.Username == username);
-                if (user == null)
+        private void CheckPassword(string username, string password)
+        {
+            var user = ctx.Users.Single(u => u.Username == username);
+            if (user == null)
                     throw new UnauthorizedAccessException();
 
                 /* Fetch the stored value */
@@ -125,12 +126,12 @@ namespace OctoCodes.Controllers
                         throw new UnauthorizedAccessException();
             }
 
-            private string GetImageName(IFormFile image)
-            {
-                var filename = Path.GetFileNameWithoutExtension(image.FileName);
-                var extension = Path.GetExtension(image.FileName);
-                filename = filename + DateTime.Now.ToString("yymmssfff") + extension;
-                return filename;
-            }
+        private string GetImageName(IFormFile image)
+        {
+            var filename = Path.GetFileNameWithoutExtension(image.FileName);
+            var extension = Path.GetExtension(image.FileName);
+            filename = filename + DateTime.Now.ToString("yyyyMMddHHmmss") + extension;
+            return filename;
         }
     }
+}
