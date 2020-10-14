@@ -32,42 +32,42 @@
             </nav>
         </header>
 
-    <div id="wrapper" class="d-flex">
-        
-        <!-- Sidebar -->
-        <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Overview</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Events</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+        <div id="wrapper" class="d-flex">
+
+            <!-- Sidebar -->
+            <div class="bg-light border-right" id="sidebar-wrapper">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Overview</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Events</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div id="page-content-wrapper">
+                <a class="btn hide-large" id="menu-show" onclick="openMenu()"><i class="fas fa-bars"></i></a>
+                <div class="container">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
             </div>
         </div>
 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <a class="btn hide-large" id="menu-show" onclick="openMenu()"><i class="fas fa-bars"></i></a>
+        <footer class="border-top footer text-muted">
             <div class="container">
-                <main role="main" class="pb-3">
-                    @RenderBody()
-                </main>
+                &copy; 2020 - OctoCodes - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </div>
-        </div>
-    </div>
+        </footer>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2020 - OctoCodes - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", false)
+        <!-- Scripts -->
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @RenderSection("Scripts", false)
 
     </body>
 </html>

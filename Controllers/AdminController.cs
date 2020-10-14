@@ -59,6 +59,8 @@ namespace OctoCodes.Controllers
         private string SaveImage(IFormFile image)
         {
             var imageName = GetImageName(image);
+            imageName = imageName.Replace("+", "-");
+            imageName = imageName.Replace(" ", "-");
             var path = Path.Combine(webHostEnvironment.WebRootPath, "img");
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using var fs = new FileStream(Path.Combine(path, imageName), FileMode.Create);
