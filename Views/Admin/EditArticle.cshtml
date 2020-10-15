@@ -1,0 +1,148 @@
+﻿@model OctoCodes.Models.Article
+
+@{
+    ViewData["Title"] = "EditArticle";
+}
+
+<h1>EditArticle</h1>
+
+<h4>Article</h4>
+<hr />
+<div class="row">
+    <div>
+        <form asp-action="NewArticle" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title">Nadpis článku</label>
+                <input asp-for="Title" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Author">Autor článku</label>
+                <input asp-for="Author" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="ImageFile">Úvodní obrázek</label>
+                <input asp-for="ImageFile" id="imgUpload" accept="image/*" />
+                <br />
+                <img id="thumbnail" src="#" alt="Vybraný obrázek" width="200" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Category">Kategorie</label>
+                <input asp-for="Category" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Text">Text</label>
+                <textarea asp-for="Text" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Přidat článek" class="btn btn-primary" /> <br />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts
+{
+    <script src="~/lib/ckeditor5/ckeditor.js"></script>
+    <script>
+
+        ClassicEditor
+            .create(document.querySelector('#Text'),
+                {
+                    simpleUpload: {
+                        uploadUrl: '/Admin/UploadImage'
+                    },
+                    fontFamily: {
+                        supportAllValues: true
+                    },
+                    fontSize: {
+                        options: [8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 36, 48],
+                        supportAllValues: true
+                    },
+                    fontColor: {
+                        colors: [
+                            {
+                                color: 'hsl(0, 0%, 0%)',
+                                label: 'Black'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 30%)',
+                                label: 'Dim grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 60%)',
+                                label: 'Grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 90%)',
+                                label: 'Light grey'
+                            },
+                            {
+                                color: 'hsl(0, 0%, 100%)',
+                                label: 'White',
+                                hasBorder: true
+                            },
+                            {
+                                color: 'hsl(0, 100%, 60%)',
+                                label: 'Red'
+                            },
+                            {
+                                color: 'hsl(30, 100%, 60%)',
+                                label: 'Orange'
+                            },
+                            {
+                                color: 'hsl(60, 100%, 60%)',
+                                label: 'Yellow'
+                            },
+                            {
+                                color: 'hsl(90, 100%, 60%)',
+                                label: 'Light green'
+                            },
+                            {
+                                color: 'hsl(120, 100%, 60%)',
+                                label: 'Green'
+                            },
+                            {
+                                color: 'hsl(240, 100%, 60%)',
+                                label: 'Blue'
+                            },
+                            {
+                                color: 'hsl(210, 100%, 60%)',
+                                label: 'Light blue'
+                            }
+                        ],
+                        columns: 6
+                    }
+                })
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $('#thumbnail').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]); // convert to base64 string
+            }
+        }
+
+        $("#imgUpload").change(function() {
+            readURL(this);
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#thumbnail').attr('src', '@Url.Content("~/")@ViewData["Image"]');
+        });
+    </script>
+}
+

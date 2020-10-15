@@ -1,0 +1,19 @@
+﻿@model IEnumerable<OctoCodes.Models.Article>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+@foreach (var item in Model)
+{
+    <a asp-action="EditArticle" asp-route-id="@item.Id" class="article-list-link">
+        <h3 class="article-list-title">@item.Title</h3>
+        <img src="@Url.Content("~/")@item.Image" class="article-list-image" />
+    </a>
+    <br />
+}

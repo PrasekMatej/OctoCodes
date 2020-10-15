@@ -21,6 +21,52 @@ namespace OctoCodes.Controllers
             this.webHostEnvironment = webHostEnvironment;
         }
 
+        public IActionResult Index()
+        {
+            return View(ctx.Articles.OrderByDescending(article => article.CreatedDate));
+        }
+
+        public IActionResult EditArticle(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            var article = ctx.Articles.FirstOrDefault(a => a.Id.Equals(id));
+            if (article == null)
+                return NotFound();
+            ViewData["Image"] = article.Image.Replace('\\', '/');
+            return View(article);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditArticle(int id, [Bind("Author, Title, Text, ImageFile, Category")]
+            Article article)
+        {
+            if (id != article.Id)
+                return NotFound();
+
+            var savedArticle = ctx.Articles.FirstOrDefault(a => a.Id.Equals(id));
+
+            if (savedArticle == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(article);
+
+            article.Image = 
+                article.ImageFile == null ? 
+                savedArticle.Image : 
+                SaveImage(article.ImageFile);
+            article.CreatedDate = savedArticle.CreatedDate;
+            article.Views = savedArticle.Views;
+
+            ctx.Articles.Update(article);
+            ctx.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         public IActionResult NewArticle()
         {
             return View();
@@ -42,8 +88,7 @@ namespace OctoCodes.Controllers
             ctx.Articles.Add(article);
             ctx.SaveChanges();
 
-            return new JsonResult("Article successfully created!");
-            //return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -51,7 +96,7 @@ namespace OctoCodes.Controllers
         {
             if (upload.Length <= 0) return null;
             var filename = SaveImage(upload);
-            var url = $"{Url.Content("~/")}img/{filename}";
+            var url = $"{Url.Content("~/")}{filename}";
             var success = new {url};
             return Json(success);
         }
@@ -61,9 +106,10 @@ namespace OctoCodes.Controllers
             var imageName = GetImageName(image);
             imageName = imageName.Replace("+", "-");
             imageName = imageName.Replace(" ", "-");
+            imageName = Path.Combine("img", imageName);
             var path = Path.Combine(webHostEnvironment.WebRootPath, "img");
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            using var fs = new FileStream(Path.Combine(path, imageName), FileMode.Create);
+            using var fs = new FileStream(Path.Combine(webHostEnvironment.WebRootPath, imageName), FileMode.Create);
             image.CopyTo(fs);
             return imageName;
         }
@@ -112,21 +158,21 @@ namespace OctoCodes.Controllers
             if (user == null)
                     throw new UnauthorizedAccessException();
 
-                /* Fetch the stored value */
-                string savedPasswordHash = user.Password;
-                /* Extract the bytes */
-                byte[] hashBytes = Convert.FromBase64String(savedPasswordHash);
-                /* Get the salt */
-                byte[] salt = new byte[16];
-                Array.Copy(hashBytes, 0, salt, 0, 16);
-                /* Compute the hash on the password the user entered */
-                var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
-                byte[] hash = pbkdf2.GetBytes(20);
-                /* Compare the results */
-                for (int i = 0; i < 20; i++)
-                    if (hashBytes[i + 16] != hash[i])
-                        throw new UnauthorizedAccessException();
-            }
+            /* Fetch the stored value */
+            string savedPasswordHash = user.Password;
+            /* Extract the bytes */
+            byte[] hashBytes = Convert.FromBase64String(savedPasswordHash);
+            /* Get the salt */
+            byte[] salt = new byte[16];
+            Array.Copy(hashBytes, 0, salt, 0, 16);
+            /* Compute the hash on the password the user entered */
+            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
+            byte[] hash = pbkdf2.GetBytes(20);
+            /* Compare the results */
+            for (int i = 0; i < 20; i++)
+                if (hashBytes[i + 16] != hash[i])
+                    throw new UnauthorizedAccessException();
+        }
 
         private string GetImageName(IFormFile image)
         {
