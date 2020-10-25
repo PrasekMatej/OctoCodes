@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using OctoCodes.Data;
 using OctoCodes.Models;
 
@@ -133,6 +136,8 @@ namespace OctoCodes.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([Bind("Username, Password")] User user)
         {
+            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+                return View(user);
             try
             {
                 CheckPassword(user.Username, user.Password);
@@ -157,6 +162,97 @@ namespace OctoCodes.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction(nameof(Login));
+        }
+
+        public async Task<IActionResult> UserManagement()
+        {
+            return View(await ctx.Users.ToListAsync());
+        }
+
+        public IActionResult CreateUser()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser([Bind("Username,Password,ConfirmPassword")] User user)
+        {
+            if (!ModelState.IsValid) return View(user);
+            try
+            {
+                user.Password = EncryptPassword(user.Password);
+                ctx.Add(user);
+                await ctx.SaveChangesAsync();
+                return RedirectToAction(nameof(UserManagement));
+            }
+            catch (DbUpdateException e)
+            {
+                TempData["ErrorMessage"] = e.InnerException.Message.Contains("Cannot insert duplicate key")
+                    ? $"Uživatel se jménem {user.Username} již existuje"
+                    : "Chyba pøi uložení dat do databáze";
+                return View(user);
+            }
+            catch (Exception e)
+            {
+                TempData["ErrorMessage"] = "Chyba pøi vytváøení uživatele";
+                return View(user);
+            }
+        }
+
+        public async Task<IActionResult> ChangePassword(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await ctx.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string id, [Bind("Username,Password,ConfirmPassword")] User user)
+        {
+            if (id != user.Username)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid) 
+                return View(user);
+
+            try
+            {
+                user.Password = EncryptPassword(user.Password);
+                ctx.Update(user);
+                await ctx.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Zmìna hesla se nezdaøila";
+            }
+            return RedirectToAction(nameof(UserManagement));
+        }
+
+        public async Task<IActionResult> DeleteUser(string username)
+        {
+            try
+            {
+                var user = await ctx.Users.FindAsync(username);
+                ctx.Users.Remove(user);
+                await ctx.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Odstranìní se nezdaøilo";
+            }
+            return RedirectToAction(nameof(UserManagement));
         }
 
         public static string EncryptPassword(string password)

@@ -1,0 +1,78 @@
+﻿@model IEnumerable<OctoCodes.Models.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<h1>Správa užvatelů</h1>
+
+<p>
+    <a asp-action="CreateUser">Vytvořit nového uživatele</a>
+</p>
+
+<div>
+    <span class="text-danger">@TempData["ErrorMessage"]</span>
+</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            Uživatelské jméno
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Username)
+            </td>
+            <td>
+                <a asp-action="ChangePassword" asp-route-id="@item.Username">Změnit heslo</a> |
+                <a href="#confirmDelete" data-toggle="modal" data-username="@item.Username" data-path="@Url.Action("DeleteUser", "Admin", new { username = @item.Username })">Odstranit uživatele</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div id="confirmDelete" class="modal fade">
+    <div class="modal-dialog modal-confirm">
+        <div class="modal-content">
+            <div class="modal-header flex-column">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title w-100">Odstranit uživatele?</h4>
+            </div>
+            <div class="modal-body">
+                <p id="deleteQuestion"></p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zrušit</button>
+                <button id="deleteUser" type="button" class="btn btn-danger">Odstranit</button>
+            </div>
+        </div>
+    </div>
+</div>   
+
+
+@section Scripts
+{
+    <script>
+        $('#confirmDelete').on('show.bs.modal',
+            function(e) {
+
+                var path = $(e.relatedTarget).data('path');
+                var username = $(e.relatedTarget).data('username');
+                $('#deleteQuestion').text("Opravdu chcete odstranit uživatele " + username + "?");
+                $('#deleteUser').click(function () {
+                    //$.post('@Url.Action("DeleteUser", "Admin")', { id: username });
+                    console.log(path);
+                    window.location = path;
+                });
+            });
+    </script>
+
+}
+
