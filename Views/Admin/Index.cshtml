@@ -2,12 +2,13 @@
 
 @{
     ViewData["Title"] = "Index";
+    Layout = "_AdminLayout";
 }
 
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="NewArticle" class="btn btn-primary">Vytvořit nový článek</a>
 </p>
 @foreach (var item in Model)
 {
