@@ -1,15 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using OctoCodes.Data;
 using OctoCodes.Models;
 
 namespace OctoCodes.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
         private readonly OctoCodesContext ctx;
@@ -114,6 +121,7 @@ namespace OctoCodes.Controllers
             return imageName;
         }
 
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
@@ -122,19 +130,33 @@ namespace OctoCodes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login([Bind("Username, Password")] User user)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([Bind("Username, Password")] User user)
         {
             try
             {
                 CheckPassword(user.Username, user.Password);
-                return new JsonResult("logged in!");
-                //return RedirectToAction(nameof(Index));
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username)
+                };
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
                 TempData["LoginFailed"] = true;
-                return View();
+                return View(user);
             }
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction(nameof(Login));
         }
 
         public static string EncryptPassword(string password)
