@@ -1,0 +1,17 @@
+﻿@model IEnumerable<OctoCodes.Models.Article>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "_Layout";
+}
+
+<h1>Články</h1>
+
+@foreach (var item in Model)
+{
+    <a asp-action="Article" asp-route-id="@item.Id" class="article-list-link">
+        <h3 class="article-list-title">@item.Title</h3>
+        <img src="@Url.Content("~/")@item.Image" class="article-list-image" />
+    </a>
+    <br />
+}

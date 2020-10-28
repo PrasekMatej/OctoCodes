@@ -36,11 +36,11 @@ namespace OctoCodes.Controllers
             return View(ctx.Articles.OrderByDescending(article => article.CreatedDate));
         }
 
-        public IActionResult EditArticle(int? id)
+        public async Task<IActionResult> EditArticle(int? id)
         {
             if (id == null)
                 return NotFound();
-            var article = ctx.Articles.FirstOrDefault(a => a.Id.Equals(id));
+            var article = await ctx.Articles.FirstOrDefaultAsync(a => a.Id.Equals(id));
             if (article == null)
                 return NotFound();
             ViewData["Image"] = article.Image.Replace('\\', '/');
