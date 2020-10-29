@@ -35,55 +35,49 @@
             <!-- Post Content -->
             <div id="content" runat="server">
             </div>
-            
+
             <!-- Comments Form -->
             <div class="card my-4">
-                <h5 class="card-header">Leave a Comment:</h5>
+                <h5 id="addCommentHeader" class="card-header">Přidat komentář:</h5>
                 <div class="card-body">
-                    <form>
+                    <form asp-action="AddComment">
+                        <input asp-for="ArticleId" value="@Model.Article.Id" type="hidden"/>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
-                            <textarea class="form-control" rows="3"></textarea>
+                            <label asp-for="Author" class="control-label"></label>
+                            <input asp-for="Author" class="form-control"/>
+                            <span asp-validation-for="Author" class="text-danger"></span>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="form-group">
+                            <label asp-for="Text" class="control-label"></label>
+                            <textarea asp-for="Text" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Přidat komentář</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Single Comment -->
-            <div class="media mb-4">
-                <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                <div class="media-body">
-                    <h5 class="mt-0">Commenter Name</h5>
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                </div>
-            </div>
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="media mb-4">
+                    <div class="media-body">
+                        <h5 class="mt-0">@comment.Author</h5>
+                        @comment.Text
 
-            <!-- Comment with nested comments -->
-            <div class="media mb-4">
-                <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                <div class="media-body">
-                    <h5 class="mt-0">Commenter Name</h5>
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                        @foreach (var subComment in comment.SubComments)
+                        {
+                            <div class="media mt-4">
+                                <div class="media-body">
+                                    <h5 class="mt-0">@subComment.Author</h5>
+                                    @comment.Text
+                                    </div>
+                            </div>
+                        }
 
-                    <div class="media mt-4">
-                        <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                        <div class="media-body">
-                            <h5 class="mt-0">Commenter Name</h5>
-                            Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
                     </div>
-
-                    <div class="media mt-4">
-                        <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                        <div class="media-body">
-                            <h5 class="mt-0">Commenter Name</h5>
-                            Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
-                    </div>
-
                 </div>
-            </div>
-
+            }
         </div>
         <div>
 

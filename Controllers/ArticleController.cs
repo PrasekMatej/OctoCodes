@@ -35,13 +35,13 @@ namespace OctoCodes.Controllers
 
             if (model.Article == null)
                 return NotFound();
-            _ = IncrementArticleViewsAsync(model.Article);
+            await IncrementArticleViewsAsync(model.Article);
 
-            model.Comments = ctx.Comments.Where(comment => comment.Article.Equals(model.Article) && comment.ParentComment == null).OrderByDescending(comment => comment.CreatedDateTime);
+            model.Comments = ctx.Comments.Where(comment => comment.Article.Id == model.Article.Id && comment.ParentComment == null).OrderByDescending(comment => comment.CreatedDateTime);
             foreach (var comment in model.Comments)
             {
-                model.Comments = ctx.Comments.Where(subComment =>
-                        subComment.Article.Equals(model.Article) && subComment.ParentComment.Id == comment.Id)
+                comment.SubComments = ctx.Comments.Where(subComment =>
+                        subComment.Article.Id == model.Article.Id && subComment.ParentComment.Id == comment.Id)
                     .OrderBy(subComment => subComment.CreatedDateTime);
             }
             return View(model);
@@ -52,6 +52,25 @@ namespace OctoCodes.Controllers
             article.Views++;
             ctx.Articles.Update(article);
             await ctx.SaveChangesAsync();
+        }
+
+        [HttpPost]
+        public IActionResult AddComment([Bind("ArticleId, Author, Text")]ArticleCommentsViewModel viewModel)
+        {
+            var article = ctx.Articles.First(article => article.Id == viewModel.ArticleId);
+            if (article == null)
+                return NotFound();
+
+            var comment = new Comment
+            {
+                CreatedDateTime = DateTime.Now,
+                Author = viewModel.Author,
+                Article = article,
+                Text = viewModel.Text,
+            };
+            ctx.Comments.Add(comment);
+            ctx.SaveChanges();
+            return RedirectToAction(nameof(Article), new{id = comment.Article.Id});
         }
     }
 }

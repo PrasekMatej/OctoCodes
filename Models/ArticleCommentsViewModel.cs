@@ -9,5 +9,10 @@ namespace OctoCodes.Models
     {
         public Article Article { get; set; }
         public IEnumerable<Comment> Comments { get; set; }
+
+
+        public int ArticleId { get; set; }
+        public string Author { get; set; }
+        public string Text { get; set; }
     }
 }
