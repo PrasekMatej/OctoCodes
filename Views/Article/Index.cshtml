@@ -9,9 +9,10 @@
 
 @foreach (var item in Model)
 {
+<div class="article-list-div" @*style="background-image: url('@Url.Content("~/")@item.Image')"*@>
     <a asp-action="Article" asp-route-id="@item.Id" class="article-list-link">
         <h3 class="article-list-title">@item.Title</h3>
         <img src="@Url.Content("~/")@item.Image" class="article-list-image" />
     </a>
-    <br />
+</div>
 }

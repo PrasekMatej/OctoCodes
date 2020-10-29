@@ -142,7 +142,7 @@
     </script>
     <script>
         $(document).ready(function () {
-            $('#thumbnail').attr('src', '@Url.Content("~/")@ViewData["Image"]');
+            $('#thumbnail').attr('src', '@Url.Content("~/")@Model.Image');
         });
     </script>
 }

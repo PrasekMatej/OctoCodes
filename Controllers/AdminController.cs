@@ -43,7 +43,6 @@ namespace OctoCodes.Controllers
             var article = await ctx.Articles.FirstOrDefaultAsync(a => a.Id.Equals(id));
             if (article == null)
                 return NotFound();
-            ViewData["Image"] = article.Image.Replace('\\', '/');
             return View(article);
         }
 
@@ -114,9 +113,10 @@ namespace OctoCodes.Controllers
         private string SaveImage(IFormFile image)
         {
             var imageName = GetImageName(image);
-            imageName = imageName.Replace("+", "-");
-            imageName = imageName.Replace(" ", "-");
-            imageName = Path.Combine("img", imageName);
+            imageName = imageName
+                .Replace("+", "-")
+                .Replace(" ", "-");
+            imageName = "img/" + imageName;
             var path = Path.Combine(webHostEnvironment.WebRootPath, "img");
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using var fs = new FileStream(Path.Combine(webHostEnvironment.WebRootPath, imageName), FileMode.Create);

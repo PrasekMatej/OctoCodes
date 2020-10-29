@@ -78,7 +78,7 @@ body {
     }
 }
 
-/* Articles 
+/* Article list
 -------------------------------------------------- */
 .article-list-image {
     max-width: 100%;
@@ -87,6 +87,12 @@ body {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.article-list-div:hover {
+    box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
 }
 
 .article-list-title {
@@ -101,4 +107,19 @@ body {
 .article-list-link:active {
     color: black;
     text-decoration: none;
+}
+
+
+/* Article
+-------------------------------------------------- */
+
+figure img {
+    width: inherit;
+}
+
+figcaption {
+    text-align: left;
+    font-style: italic;
+    font-size: smaller;
+    text-indent: 0;
 }
